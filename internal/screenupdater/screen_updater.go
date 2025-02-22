@@ -3,9 +3,8 @@ package screenupdater
 import (
 	"bytes"
 	"fmt"
-	"github.com/digitalsquid7/cli-chess/internal/ansicode"
+	"github.com/digitalsquid7/cli-chess/internal/ansi"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate"
-	"time"
 )
 
 type ScreenUpdater struct {
@@ -41,14 +40,23 @@ func (s *ScreenUpdater) Update() {
 
 	for y := range s.gameState.Board {
 		for x := range s.gameState.Board[y] {
-			if s.gameState.Board[y][x] != nil {
-				text := ansicode.CreateANSIText(string(s.gameState.Board[y][x].Character), ansicode.Green)
-				board[y*2+1][x*4+2] = text
+			if s.gameState.Board[y][x] == nil {
+				continue
 			}
+
+			colour := ansi.White
+			if s.gameState.Cursor[0] == y && s.gameState.Cursor[1] == x {
+				colour = ansi.Green
+			}
+
+			text := ansi.CreateANSIText(string(s.gameState.Board[y][x].Character), colour)
+			board[y*2+1][x*4+2] = text
 		}
 	}
 
 	buffer := bytes.Buffer{}
+
+	fmt.Fprint(&buffer, ansi.RefreshScreen)
 
 	for i := range board {
 		for j := range board[i] {
@@ -57,10 +65,5 @@ func (s *ScreenUpdater) Update() {
 		fmt.Fprint(&buffer, "\n")
 	}
 
-	// Clear screen
-	//fmt.Fprint(&buffer, "[H[2J")
-
 	fmt.Print(buffer.String())
-
-	time.Sleep(5 * time.Second)
 }

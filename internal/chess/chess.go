@@ -2,8 +2,12 @@ package chess
 
 import (
 	"fmt"
+	"github.com/digitalsquid7/cli-chess/internal/ansi"
+	"github.com/digitalsquid7/cli-chess/internal/command"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate"
 	"github.com/digitalsquid7/cli-chess/internal/screenupdater"
+	term "github.com/nsf/termbox-go"
+	"time"
 )
 
 type Game struct{}
@@ -12,17 +16,32 @@ func NewGame() *Game {
 	return &Game{}
 }
 
-func (g *Game) Play() {
-	// Activate alternate screen mode
-	fmt.Print("\033[?1049h")
-	defer fmt.Print("\033[?1049l")
+func (g *Game) Play() error {
+	fmt.Print(ansi.EnableAlternativeScreen)
+	defer fmt.Print(ansi.DisableAlternativeScreen)
 
-	fmt.Print("\033[2J\033[H")
-	//cmd := exec.Command("clear")
-	//cmd.Stdout = os.Stdout
-	//cmd.Run()
+	err := term.Init()
+	if err != nil {
+		return fmt.Errorf("term.Init: %w", err)
+	}
+	defer term.Close()
 
 	gameState := gamestate.NewGameState()
 	screenUpdater := screenupdater.New(gameState)
-	screenUpdater.Update()
+	commandExecutor := command.NewExecutor(gameState)
+
+	for range time.Tick(time.Second / 15) {
+		end, err := commandExecutor.Execute()
+		if end {
+			return nil
+		}
+
+		if err != nil {
+			return fmt.Errorf("commandExecutor.Execute: %w", err)
+		}
+
+		screenUpdater.Update()
+	}
+
+	return nil
 }
