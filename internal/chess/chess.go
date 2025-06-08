@@ -40,7 +40,9 @@ func (g *Game) Play() error {
 			return fmt.Errorf("commandExecutor.Execute: %w", err)
 		}
 
-		screenUpdater.Update()
+		if err = screenUpdater.Update(); err != nil {
+			return fmt.Errorf("screenUpdater.Update: %w", err)
+		}
 	}
 
 	return nil

@@ -1,0 +1,40 @@
+package movefinder
+
+import (
+	"github.com/digitalsquid7/cli-chess/internal/character"
+	"github.com/digitalsquid7/cli-chess/internal/gamestate/board"
+	"github.com/digitalsquid7/cli-chess/internal/gamestate/coordinate"
+	"github.com/digitalsquid7/cli-chess/internal/gamestate/movefinder/pawn"
+)
+
+type PieceMoveFinder interface {
+	FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate
+}
+
+type MoveFinder struct {
+	moveFinders map[character.Character]PieceMoveFinder
+	board       board.Board
+}
+
+func New(board board.Board) *MoveFinder {
+	return &MoveFinder{
+		board: board,
+		moveFinders: map[character.Character]PieceMoveFinder{
+			character.Pawn: pawn.NewMoveFinder(board),
+		},
+	}
+}
+
+func (m *MoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate {
+	piece, _ := m.board.GetPiece(coor)
+	if piece == nil {
+		return nil
+	}
+
+	moveFinder := m.moveFinders[piece.Character]
+	if moveFinder == nil {
+		return nil
+	}
+
+	return moveFinder.FindMoves(coor)
+}
