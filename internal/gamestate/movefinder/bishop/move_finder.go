@@ -1,4 +1,4 @@
-package rook
+package bishop
 
 import (
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/board"
@@ -16,10 +16,10 @@ func NewMoveFinder(board board.Board) *MoveFinder {
 func (m *MoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate {
 	var moves []coordinate.Coordinate
 
-	moves = append(moves, m.findMoves(coor, coordinate.Up)...)
-	moves = append(moves, m.findMoves(coor, coordinate.Down)...)
-	moves = append(moves, m.findMoves(coor, coordinate.Left)...)
-	moves = append(moves, m.findMoves(coor, coordinate.Right)...)
+	moves = append(moves, m.findMoves(coor, coordinate.TopRight)...)
+	moves = append(moves, m.findMoves(coor, coordinate.TopLeft)...)
+	moves = append(moves, m.findMoves(coor, coordinate.BottomRight)...)
+	moves = append(moves, m.findMoves(coor, coordinate.BottomLeft)...)
 
 	return moves
 }

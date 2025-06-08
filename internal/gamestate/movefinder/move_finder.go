@@ -4,7 +4,11 @@ import (
 	"github.com/digitalsquid7/cli-chess/internal/character"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/board"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/coordinate"
+	"github.com/digitalsquid7/cli-chess/internal/gamestate/movefinder/bishop"
+	"github.com/digitalsquid7/cli-chess/internal/gamestate/movefinder/king"
+	"github.com/digitalsquid7/cli-chess/internal/gamestate/movefinder/knight"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/movefinder/pawn"
+	"github.com/digitalsquid7/cli-chess/internal/gamestate/movefinder/queen"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/movefinder/rook"
 )
 
@@ -21,8 +25,12 @@ func New(board board.Board) *MoveFinder {
 	return &MoveFinder{
 		board: board,
 		moveFinders: map[character.Character]PieceMoveFinder{
-			character.Pawn: pawn.NewMoveFinder(board),
-			character.Rook: rook.NewMoveFinder(board),
+			character.Pawn:   pawn.NewMoveFinder(board),
+			character.Rook:   rook.NewMoveFinder(board),
+			character.Knight: knight.NewMoveFinder(board),
+			character.Bishop: bishop.NewMoveFinder(board),
+			character.Queen:  queen.NewMoveFinder(board),
+			character.King:   king.NewMoveFinder(board),
 		},
 	}
 }
