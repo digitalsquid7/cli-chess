@@ -34,7 +34,7 @@ func (e *Executor) Execute() (bool, error) {
 	case term.KeyArrowDown:
 		e.gameState.MoveDown()
 	case term.KeyEnter:
-		e.gameState.SelectPiece()
+		e.gameState.Select()
 	case term.KeyCtrlC:
 		return true, nil
 	default:

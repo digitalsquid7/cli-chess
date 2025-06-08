@@ -26,7 +26,7 @@ func (g *Game) Play() error {
 	}
 	defer term.Close()
 
-	gameState := gamestate.NewGameState()
+	gameState := gamestate.New()
 	screenUpdater := screenupdater.New(gameState)
 	commandExecutor := command.NewExecutor(gameState)
 

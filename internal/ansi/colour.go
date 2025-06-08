@@ -3,9 +3,10 @@ package ansi
 type Colour string
 
 const (
-	Black            = "\033[30m"
+	Black            = ""
 	Red              = "\033[31m"
 	Green            = "\033[32m"
+	BackgroundGreen  = "\033[42m"
 	Yellow           = "\033[33m"
 	BackgroundYellow = "\033[43m"
 	Blue             = "\033[34m"

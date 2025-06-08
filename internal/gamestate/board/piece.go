@@ -10,4 +10,5 @@ type Piece struct {
 	Character character.Character
 	Colour    gamecolour.Colour
 	Direction direction.Direction
+	Moved     bool
 }

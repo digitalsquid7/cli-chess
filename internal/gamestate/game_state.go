@@ -3,21 +3,25 @@ package gamestate
 import (
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/board"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/coordinate"
+	"github.com/digitalsquid7/cli-chess/internal/gamestate/gamecolour"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/movefinder"
+	"slices"
 )
 
 type GameState struct {
-	Board         board.Board
-	Cursor        coordinate.Coordinate
-	SelectedPiece *coordinate.Coordinate
-	MoveFinder    *movefinder.MoveFinder
-	ValidMoves    []coordinate.Coordinate
+	Board      board.Board
+	Cursor     coordinate.Coordinate
+	Selected   *coordinate.Coordinate
+	MoveFinder *movefinder.MoveFinder
+	ValidMoves []coordinate.Coordinate
+	PlayerTurn gamecolour.Colour
 }
 
-func NewGameState() *GameState {
+func New() *GameState {
 	gameState := &GameState{
-		Board:  board.New(),
-		Cursor: coordinate.Coordinate{0, 2},
+		Board:      board.New(),
+		Cursor:     coordinate.Coordinate{0, 2},
+		PlayerTurn: gamecolour.White,
 	}
 
 	gameState.MoveFinder = movefinder.New(gameState.Board)
@@ -25,55 +29,71 @@ func NewGameState() *GameState {
 }
 
 func (g *GameState) MoveLeft() {
-	coor := g.Cursor.Left(1)
-
-	if g.insideBoard(coor) {
-		g.Cursor = coor
-	}
+	g.move(g.Cursor.Left(1))
 }
 
 func (g *GameState) MoveRight() {
-	coor := g.Cursor.Right(1)
-
-	if g.insideBoard(coor) {
-		g.Cursor = coor
-	}
+	g.move(g.Cursor.Right(1))
 }
 
 func (g *GameState) MoveUp() {
-	coor := g.Cursor.Up(1)
-
-	if g.insideBoard(coor) {
-		g.Cursor = coor
-	}
+	g.move(g.Cursor.Up(1))
 }
 
 func (g *GameState) MoveDown() {
-	coor := g.Cursor.Down(1)
+	g.move(g.Cursor.Down(1))
+}
 
-	if g.insideBoard(coor) {
+func (g *GameState) Select() {
+	if g.Selected == nil {
+		g.selectPiece()
+		return
+	}
+
+	if slices.Contains(g.ValidMoves, g.Cursor) {
+		g.movePiece()
+		return
+	}
+
+	if *g.Selected == g.Cursor {
+		g.clearSelection()
+	}
+}
+
+func (g *GameState) move(coor coordinate.Coordinate) {
+	if insideBoard(coor) {
 		g.Cursor = coor
 	}
 }
 
-func (g *GameState) SelectPiece() {
-	if g.SelectedPiece == nil {
-		g.SelectedPiece = ref(coordinate.Make(g.Cursor.X(), g.Cursor.Y()))
+func (g *GameState) selectPiece() {
+	piece, _ := g.Board.GetPiece(g.Cursor)
+	if piece != nil && piece.Colour == g.PlayerTurn {
+		g.Selected = ref(coordinate.Make(g.Cursor.X(), g.Cursor.Y()))
 		g.ValidMoves = g.MoveFinder.FindMoves(g.Cursor)
-		return
 	}
-
-	if *g.SelectedPiece != g.Cursor {
-		*g.SelectedPiece = g.Cursor
-		g.ValidMoves = g.MoveFinder.FindMoves(g.Cursor)
-		return
-	}
-
-	g.ValidMoves = nil
-	g.SelectedPiece = nil
 }
 
-func (g *GameState) insideBoard(coor coordinate.Coordinate) bool {
+func (g *GameState) movePiece() {
+	selected, _ := g.Board.GetPiece(*g.Selected)
+	selected.Moved = true
+	g.Board.SetPiece(g.Cursor, selected)
+	g.Board.SetPiece(*g.Selected, nil)
+	g.clearSelection()
+
+	if g.PlayerTurn == gamecolour.White {
+		g.PlayerTurn = gamecolour.Black
+	} else {
+		g.PlayerTurn = gamecolour.White
+	}
+}
+
+func (g *GameState) clearSelection() {
+	g.ValidMoves = nil
+	g.Selected = nil
+}
+
+func insideBoard(coor coordinate.Coordinate) bool {
 	return coor.X() >= 0 && coor.X() <= 7 && coor.Y() >= 0 && coor.Y() <= 7
 }
 

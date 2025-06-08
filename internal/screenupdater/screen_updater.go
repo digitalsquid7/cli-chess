@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/digitalsquid7/cli-chess/internal/ansi"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate"
+	"github.com/digitalsquid7/cli-chess/internal/gamestate/coordinate"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/gamecolour"
+	"slices"
 )
 
 type ScreenUpdater struct {
@@ -50,7 +52,7 @@ func (s *ScreenUpdater) createBoard() [][]string {
 
 	for y := range s.gameState.Board {
 		for x := range s.gameState.Board[y] {
-			board[y*2+1][x*2+1] = fmt.Sprint(s.getColour(x, y), s.getBold(x, y), " ", s.getCharacter(x, y), " ", ansi.Reset)
+			board[y*2+1][x*2+1] = fmt.Sprint(s.getBackgroundColour(x, y), s.getForegroundColour(x, y), s.getBold(x, y), s.getCharacter(x, y), ansi.Reset)
 		}
 	}
 
@@ -81,12 +83,13 @@ func (s *ScreenUpdater) printGame(board [][]string) error {
 	return err
 }
 
-func (s *ScreenUpdater) getColour(x, y int) gamecolour.Colour {
-	if s.gameState.Cursor.Y() == y && s.gameState.Cursor.X() == x {
-		if s.gameState.Board[y][x] == nil {
-			return ansi.BackgroundYellow
-		}
+func (s *ScreenUpdater) getForegroundColour(x, y int) gamecolour.Colour {
+	if s.gameState.Cursor.Y() == y && s.gameState.Cursor.X() == x && s.gameState.Board[y][x] != nil {
 		return ansi.Yellow
+	}
+
+	if slices.Contains(s.gameState.ValidMoves, coordinate.Make(x, y)) {
+		return ansi.Green
 	}
 
 	if s.gameState.Board[y][x] != nil {
@@ -99,16 +102,28 @@ func (s *ScreenUpdater) getColour(x, y int) gamecolour.Colour {
 	return ""
 }
 
-func (s *ScreenUpdater) getCharacter(x, y int) string {
-	if s.gameState.Board[y][x] != nil {
-		return string(s.gameState.Board[y][x].Character)
+func (s *ScreenUpdater) getBackgroundColour(x, y int) gamecolour.Colour {
+	if s.gameState.Cursor.Y() == y && s.gameState.Cursor.X() == x && s.gameState.Board[y][x] == nil {
+		return ansi.BackgroundYellow
 	}
 
-	return " "
+	return ""
+}
+
+func (s *ScreenUpdater) getCharacter(x, y int) string {
+	if s.gameState.Board[y][x] != nil {
+		return " " + string(s.gameState.Board[y][x].Character) + " "
+	}
+
+	if slices.Contains(s.gameState.ValidMoves, coordinate.Make(x, y)) {
+		return "░░░"
+	}
+
+	return "   "
 }
 
 func (s *ScreenUpdater) getBold(x, y int) string {
-	if s.gameState.SelectedPiece != nil && s.gameState.SelectedPiece.Y() == y && s.gameState.SelectedPiece.X() == x {
+	if s.gameState.Selected != nil && s.gameState.Selected.Y() == y && s.gameState.Selected.X() == x {
 		return ansi.Bold
 	}
 

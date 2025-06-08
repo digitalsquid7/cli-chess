@@ -65,6 +65,10 @@ func (b Board) GetPiece(coor coordinate.Coordinate) (*Piece, bool) {
 	return b[coor.Y()][coor.X()], true
 }
 
+func (b Board) SetPiece(coor coordinate.Coordinate, piece *Piece) {
+	b[coor.Y()][coor.X()] = piece
+}
+
 func (b Board) insideBoard(coor coordinate.Coordinate) bool {
 	return coor.X() >= 0 && coor.X() <= 7 && coor.Y() >= 0 && coor.Y() <= 7
 }

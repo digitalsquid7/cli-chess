@@ -6,36 +6,50 @@ import (
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/direction"
 )
 
-type PawnMoveFinder struct {
+type MoveFinder struct {
 	board board.Board
 }
 
-func NewMoveFinder(board board.Board) *PawnMoveFinder {
-	return &PawnMoveFinder{board: board}
+func NewMoveFinder(board board.Board) *MoveFinder {
+	return &MoveFinder{board: board}
 }
 
-func (m *PawnMoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate {
+func (m *MoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate {
 	var moves []coordinate.Coordinate
 	curr, _ := m.board.GetPiece(coor)
 
-	temp := coor.Up(1)
+	target := coor.Up(1)
 	if curr.Direction == direction.Down {
-		temp = coor.Down(1)
+		target = coor.Down(1)
 	}
 
-	piece, ok := m.board.GetPiece(temp)
+	piece, ok := m.board.GetPiece(target)
 	if ok && piece == nil {
-		moves = append(moves, temp)
+		moves = append(moves, target)
 	}
 
-	piece, ok = m.board.GetPiece(temp.Left(1))
+	piece, ok = m.board.GetPiece(target.Left(1))
 	if ok && piece != nil && piece.Colour != curr.Colour {
-		moves = append(moves, temp.Left(1))
+		moves = append(moves, target.Left(1))
 	}
 
-	piece, ok = m.board.GetPiece(temp.Right(1))
+	piece, ok = m.board.GetPiece(target.Right(1))
 	if ok && piece != nil && piece.Colour != curr.Colour {
-		moves = append(moves, temp.Right(1))
+		moves = append(moves, target.Right(1))
+	}
+
+	if curr.Moved {
+		return moves
+	}
+
+	target = coor.Up(2)
+	if curr.Direction == direction.Down {
+		target = coor.Down(2)
+	}
+
+	piece, ok = m.board.GetPiece(target)
+	if ok && piece == nil {
+		moves = append(moves, target)
 	}
 
 	return moves
