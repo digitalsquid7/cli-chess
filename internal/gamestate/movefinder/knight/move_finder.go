@@ -13,24 +13,23 @@ func NewMoveFinder(board board.Board) *MoveFinder {
 	return &MoveFinder{board: board}
 }
 
-func (m *MoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate {
+func (m *MoveFinder) FindMoves(knight *board.Piece) []coordinate.Coordinate {
 	var moves []coordinate.Coordinate
-	curr, _ := m.board.GetPiece(coor)
 
 	targets := []coordinate.Coordinate{
-		coor.Up(1).Right(2),
-		coor.Up(1).Left(2),
-		coor.Right(1).Up(2),
-		coor.Right(1).Down(2),
-		coor.Down(1).Right(2),
-		coor.Down(1).Left(2),
-		coor.Left(1).Up(2),
-		coor.Left(1).Down(2),
+		knight.Coor.Up(1).Right(2),
+		knight.Coor.Up(1).Left(2),
+		knight.Coor.Right(1).Up(2),
+		knight.Coor.Right(1).Down(2),
+		knight.Coor.Down(1).Right(2),
+		knight.Coor.Down(1).Left(2),
+		knight.Coor.Left(1).Up(2),
+		knight.Coor.Left(1).Down(2),
 	}
 
 	for _, target := range targets {
 		piece, ok := m.board.GetPiece(target)
-		if ok && (piece == nil || piece.Colour != curr.Colour) {
+		if ok && (piece == nil || piece.Colour != knight.Colour) {
 			moves = append(moves, target)
 		}
 	}

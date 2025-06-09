@@ -13,37 +13,36 @@ func NewMoveFinder(board board.Board) *MoveFinder {
 	return &MoveFinder{board: board}
 }
 
-func (m *MoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate {
+func (m *MoveFinder) FindMoves(bishop *board.Piece) []coordinate.Coordinate {
 	var moves []coordinate.Coordinate
 
-	moves = append(moves, m.findMoves(coor, coordinate.TopRight)...)
-	moves = append(moves, m.findMoves(coor, coordinate.TopLeft)...)
-	moves = append(moves, m.findMoves(coor, coordinate.BottomRight)...)
-	moves = append(moves, m.findMoves(coor, coordinate.BottomLeft)...)
+	moves = append(moves, m.findMoves(bishop, coordinate.TopRight)...)
+	moves = append(moves, m.findMoves(bishop, coordinate.TopLeft)...)
+	moves = append(moves, m.findMoves(bishop, coordinate.BottomRight)...)
+	moves = append(moves, m.findMoves(bishop, coordinate.BottomLeft)...)
 
 	return moves
 }
 
-func (m *MoveFinder) findMoves(coor coordinate.Coordinate, move func(coordinate.Coordinate, int) coordinate.Coordinate) []coordinate.Coordinate {
+func (m *MoveFinder) findMoves(bishop *board.Piece, move func(coordinate.Coordinate, int) coordinate.Coordinate) []coordinate.Coordinate {
 	var moves []coordinate.Coordinate
-	selected, _ := m.board.GetPiece(coor)
 
 	incr := 0
 
 	for {
 		incr++
-		curr, ok := m.board.GetPiece(move(coor, incr))
+		curr, ok := m.board.GetPiece(move(bishop.Coor, incr))
 		if !ok {
 			break
 		}
 
 		if curr == nil {
-			moves = append(moves, move(coor, incr))
+			moves = append(moves, move(bishop.Coor, incr))
 			continue
 		}
 
-		if curr.Colour != selected.Colour {
-			moves = append(moves, move(coor, incr))
+		if curr.Colour != bishop.Colour {
+			moves = append(moves, move(bishop.Coor, incr))
 		}
 
 		break

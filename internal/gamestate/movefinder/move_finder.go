@@ -13,7 +13,7 @@ import (
 )
 
 type PieceMoveFinder interface {
-	FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate
+	FindMoves(piece *board.Piece) []coordinate.Coordinate
 }
 
 type MoveFinder struct {
@@ -35,8 +35,7 @@ func New(board board.Board) *MoveFinder {
 	}
 }
 
-func (m *MoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate {
-	piece, _ := m.board.GetPiece(coor)
+func (m *MoveFinder) FindMoves(piece *board.Piece) []coordinate.Coordinate {
 	if piece == nil {
 		return nil
 	}
@@ -46,5 +45,5 @@ func (m *MoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordina
 		return nil
 	}
 
-	return moveFinder.FindMoves(coor)
+	return moveFinder.FindMoves(piece)
 }

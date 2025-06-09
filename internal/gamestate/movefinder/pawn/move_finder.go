@@ -14,41 +14,40 @@ func NewMoveFinder(board board.Board) *MoveFinder {
 	return &MoveFinder{board: board}
 }
 
-func (m *MoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate {
+func (m *MoveFinder) FindMoves(pawn *board.Piece) []coordinate.Coordinate {
 	var moves []coordinate.Coordinate
-	curr, _ := m.board.GetPiece(coor)
 
-	target := coor.Up(1)
-	if curr.Direction == direction.Down {
-		target = coor.Down(1)
+	target := pawn.Coor.Up(1)
+	if pawn.Direction == direction.Down {
+		target = pawn.Coor.Down(1)
 	}
 
-	piece, ok := m.board.GetPiece(target)
-	if ok && piece == nil {
+	curr, ok := m.board.GetPiece(target)
+	if ok && curr == nil {
 		moves = append(moves, target)
 	}
 
-	piece, ok = m.board.GetPiece(target.Left(1))
-	if ok && piece != nil && piece.Colour != curr.Colour {
+	curr, ok = m.board.GetPiece(target.Left(1))
+	if ok && curr != nil && curr.Colour != pawn.Colour {
 		moves = append(moves, target.Left(1))
 	}
 
-	piece, ok = m.board.GetPiece(target.Right(1))
-	if ok && piece != nil && piece.Colour != curr.Colour {
+	curr, ok = m.board.GetPiece(target.Right(1))
+	if ok && curr != nil && curr.Colour != pawn.Colour {
 		moves = append(moves, target.Right(1))
 	}
 
-	if curr.Moved {
+	if pawn.Moved {
 		return moves
 	}
 
-	target = coor.Up(2)
-	if curr.Direction == direction.Down {
-		target = coor.Down(2)
+	target = pawn.Coor.Up(2)
+	if pawn.Direction == direction.Down {
+		target = pawn.Coor.Down(2)
 	}
 
-	piece, ok = m.board.GetPiece(target)
-	if ok && piece == nil {
+	curr, ok = m.board.GetPiece(target)
+	if ok && curr == nil {
 		moves = append(moves, target)
 	}
 

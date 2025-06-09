@@ -1,6 +1,7 @@
 package gamestate
 
 import (
+	"github.com/digitalsquid7/cli-chess/internal/character"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/board"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/coordinate"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate/gamecolour"
@@ -29,19 +30,19 @@ func New() *GameState {
 }
 
 func (g *GameState) MoveLeft() {
-	g.move(g.Cursor.Left(1))
+	g.moveCursor(g.Cursor.Left(1))
 }
 
 func (g *GameState) MoveRight() {
-	g.move(g.Cursor.Right(1))
+	g.moveCursor(g.Cursor.Right(1))
 }
 
 func (g *GameState) MoveUp() {
-	g.move(g.Cursor.Up(1))
+	g.moveCursor(g.Cursor.Up(1))
 }
 
 func (g *GameState) MoveDown() {
-	g.move(g.Cursor.Down(1))
+	g.moveCursor(g.Cursor.Down(1))
 }
 
 func (g *GameState) Select() {
@@ -60,7 +61,7 @@ func (g *GameState) Select() {
 	}
 }
 
-func (g *GameState) move(coor coordinate.Coordinate) {
+func (g *GameState) moveCursor(coor coordinate.Coordinate) {
 	if insideBoard(coor) {
 		g.Cursor = coor
 	}
@@ -70,15 +71,26 @@ func (g *GameState) selectPiece() {
 	piece, _ := g.Board.GetPiece(g.Cursor)
 	if piece != nil && piece.Colour == g.PlayerTurn {
 		g.Selected = ref(coordinate.Make(g.Cursor.X(), g.Cursor.Y()))
-		g.ValidMoves = g.MoveFinder.FindMoves(g.Cursor)
+		g.ValidMoves = g.MoveFinder.FindMoves(g.Board[g.Cursor.Y()][g.Cursor.X()])
 	}
 }
 
 func (g *GameState) movePiece() {
 	selected, _ := g.Board.GetPiece(*g.Selected)
-	selected.Moved = true
+	destination, _ := g.Board.GetPiece(g.Cursor)
+
 	g.Board.SetPiece(g.Cursor, selected)
-	g.Board.SetPiece(*g.Selected, nil)
+
+	if g.castling(selected, destination) {
+		g.Board.SetPiece(*g.Selected, destination)
+	} else {
+		g.Board.SetPiece(*g.Selected, nil)
+	}
+
+	if g.queening(selected) {
+		selected.Character = character.Queen
+	}
+
 	g.clearSelection()
 
 	if g.PlayerTurn == gamecolour.White {
@@ -91,6 +103,16 @@ func (g *GameState) movePiece() {
 func (g *GameState) clearSelection() {
 	g.ValidMoves = nil
 	g.Selected = nil
+}
+
+func (g *GameState) castling(selected, destination *board.Piece) bool {
+	return destination != nil &&
+		((selected.Character == character.Rook && destination.Character == character.King) ||
+			(selected.Character == character.King && destination.Character == character.Rook))
+}
+
+func (g *GameState) queening(selected *board.Piece) bool {
+	return selected.Character == character.Pawn && (g.Cursor.Y() == 0 || g.Cursor.Y() == 7)
 }
 
 func insideBoard(coor coordinate.Coordinate) bool {

@@ -13,41 +13,40 @@ func NewMoveFinder(board board.Board) *MoveFinder {
 	return &MoveFinder{board: board}
 }
 
-func (m *MoveFinder) FindMoves(coor coordinate.Coordinate) []coordinate.Coordinate {
+func (m *MoveFinder) FindMoves(queen *board.Piece) []coordinate.Coordinate {
 	var moves []coordinate.Coordinate
 
-	moves = append(moves, m.findMoves(coor, coordinate.Up)...)
-	moves = append(moves, m.findMoves(coor, coordinate.Down)...)
-	moves = append(moves, m.findMoves(coor, coordinate.Right)...)
-	moves = append(moves, m.findMoves(coor, coordinate.Left)...)
-	moves = append(moves, m.findMoves(coor, coordinate.TopRight)...)
-	moves = append(moves, m.findMoves(coor, coordinate.TopLeft)...)
-	moves = append(moves, m.findMoves(coor, coordinate.BottomRight)...)
-	moves = append(moves, m.findMoves(coor, coordinate.BottomLeft)...)
+	moves = append(moves, m.findMoves(queen, coordinate.Up)...)
+	moves = append(moves, m.findMoves(queen, coordinate.Down)...)
+	moves = append(moves, m.findMoves(queen, coordinate.Right)...)
+	moves = append(moves, m.findMoves(queen, coordinate.Left)...)
+	moves = append(moves, m.findMoves(queen, coordinate.TopRight)...)
+	moves = append(moves, m.findMoves(queen, coordinate.TopLeft)...)
+	moves = append(moves, m.findMoves(queen, coordinate.BottomRight)...)
+	moves = append(moves, m.findMoves(queen, coordinate.BottomLeft)...)
 
 	return moves
 }
 
-func (m *MoveFinder) findMoves(coor coordinate.Coordinate, move func(coordinate.Coordinate, int) coordinate.Coordinate) []coordinate.Coordinate {
+func (m *MoveFinder) findMoves(queen *board.Piece, move func(coordinate.Coordinate, int) coordinate.Coordinate) []coordinate.Coordinate {
 	var moves []coordinate.Coordinate
-	selected, _ := m.board.GetPiece(coor)
 
 	incr := 0
 
 	for {
 		incr++
-		curr, ok := m.board.GetPiece(move(coor, incr))
+		curr, ok := m.board.GetPiece(move(queen.Coor, incr))
 		if !ok {
 			break
 		}
 
 		if curr == nil {
-			moves = append(moves, move(coor, incr))
+			moves = append(moves, move(queen.Coor, incr))
 			continue
 		}
 
-		if curr.Colour != selected.Colour {
-			moves = append(moves, move(coor, incr))
+		if curr.Colour != queen.Colour {
+			moves = append(moves, move(queen.Coor, incr))
 		}
 
 		break

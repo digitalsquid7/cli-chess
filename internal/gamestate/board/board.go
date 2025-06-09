@@ -10,7 +10,7 @@ import (
 type Board [][]*Piece
 
 func New() Board {
-	return Board{
+	board := Board{
 		{
 			&Piece{Colour: gamecolour.Black, Character: character.Rook},
 			&Piece{Colour: gamecolour.Black, Character: character.Knight},
@@ -56,6 +56,16 @@ func New() Board {
 			&Piece{Colour: gamecolour.White, Character: character.Rook},
 		},
 	}
+
+	for y := range board {
+		for x := range board[y] {
+			if board[y][x] != nil {
+				board[y][x].Coor = coordinate.Make(x, y)
+			}
+		}
+	}
+
+	return board
 }
 
 func (b Board) GetPiece(coor coordinate.Coordinate) (*Piece, bool) {
@@ -66,6 +76,11 @@ func (b Board) GetPiece(coor coordinate.Coordinate) (*Piece, bool) {
 }
 
 func (b Board) SetPiece(coor coordinate.Coordinate, piece *Piece) {
+	if piece != nil {
+		piece.Coor = coor
+		piece.Moved = true
+	}
+
 	b[coor.Y()][coor.X()] = piece
 }
 
