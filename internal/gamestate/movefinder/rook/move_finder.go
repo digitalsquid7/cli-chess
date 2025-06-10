@@ -61,14 +61,14 @@ func (m *MoveFinder) findCastlingMoves(rook *board.Piece) []coordinate.Coordinat
 		return moves
 	}
 
-	king, _ := m.board.GetPiece(coordinate.Make(3, rook.Coor.Y()))
+	king, _ := m.board.GetPiece(coordinate.Make(4, rook.Coor.Y()))
 
-	if king.Character != character.King || king.Moved {
+	if king == nil || king.Character != character.King || king.Moved {
 		return moves
 	}
 
-	if (rook.Coor.X() == 0 && m.board[rook.Coor.Y()][1] == nil && m.board[rook.Coor.Y()][2] == nil) ||
-		(rook.Coor.X() == 7 && m.board[rook.Coor.Y()][4] == nil && m.board[rook.Coor.Y()][5] == nil && m.board[rook.Coor.Y()][6] == nil) {
+	if (rook.Coor.X() == 0 && m.board[rook.Coor.Y()][1] == nil && m.board[rook.Coor.Y()][2] == nil && m.board[rook.Coor.Y()][3] == nil) ||
+		(rook.Coor.X() == 7 && m.board[rook.Coor.Y()][5] == nil && m.board[rook.Coor.Y()][6] == nil) {
 		moves = append(moves, king.Coor)
 	}
 

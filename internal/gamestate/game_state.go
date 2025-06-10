@@ -76,28 +76,15 @@ func (g *GameState) selectPiece() {
 }
 
 func (g *GameState) movePiece() {
+	g.checkCastling()
+	g.checkQueening()
+
 	selected, _ := g.Board.GetPiece(*g.Selected)
-	destination, _ := g.Board.GetPiece(g.Cursor)
-
 	g.Board.SetPiece(g.Cursor, selected)
-
-	if g.castling(selected, destination) {
-		g.Board.SetPiece(*g.Selected, destination)
-	} else {
-		g.Board.SetPiece(*g.Selected, nil)
-	}
-
-	if g.queening(selected) {
-		selected.Character = character.Queen
-	}
+	g.Board.SetPiece(*g.Selected, nil)
 
 	g.clearSelection()
-
-	if g.PlayerTurn == gamecolour.White {
-		g.PlayerTurn = gamecolour.Black
-	} else {
-		g.PlayerTurn = gamecolour.White
-	}
+	g.switchPlayerTurn()
 }
 
 func (g *GameState) clearSelection() {
@@ -105,14 +92,54 @@ func (g *GameState) clearSelection() {
 	g.Selected = nil
 }
 
-func (g *GameState) castling(selected, destination *board.Piece) bool {
-	return destination != nil &&
-		((selected.Character == character.Rook && destination.Character == character.King) ||
-			(selected.Character == character.King && destination.Character == character.Rook))
+// checkCastling checks if the selected and destination pieces are a rook and king in a valid castling
+// position and updates the board.
+func (g *GameState) checkCastling() {
+	selected, _ := g.Board.GetPiece(*g.Selected)
+	destination, _ := g.Board.GetPiece(g.Cursor)
+
+	if selected == nil || destination == nil ||
+		!((selected.Character == character.Rook && destination.Character == character.King) ||
+			(selected.Character == character.King && destination.Character == character.Rook)) {
+		return
+	}
+
+	var rook, king *board.Piece
+
+	if selected.Character == character.Rook {
+		rook = selected
+		king = destination
+	} else {
+		rook = destination
+		king = selected
+	}
+
+	if rook.Coor.X() == 0 {
+		g.Board.SetPiece(coordinate.Make(3, rook.Coor.Y()), rook)
+		g.Board.SetPiece(coordinate.Make(2, rook.Coor.Y()), king)
+	} else {
+		g.Board.SetPiece(coordinate.Make(5, rook.Coor.Y()), rook)
+		g.Board.SetPiece(coordinate.Make(6, rook.Coor.Y()), king)
+	}
+
+	g.Board.SetPiece(g.Cursor, nil)
+	g.Board.SetPiece(*g.Selected, nil)
 }
 
-func (g *GameState) queening(selected *board.Piece) bool {
-	return selected.Character == character.Pawn && (g.Cursor.Y() == 0 || g.Cursor.Y() == 7)
+// checkQueening promotes a pawn to a queen if it reaches the opposing end of the board.
+func (g *GameState) checkQueening() {
+	selected, _ := g.Board.GetPiece(*g.Selected)
+	if selected != nil && selected.Character == character.Pawn && (g.Cursor.Y() == 0 || g.Cursor.Y() == 7) {
+		selected.Character = character.Queen
+	}
+}
+
+func (g *GameState) switchPlayerTurn() {
+	if g.PlayerTurn == gamecolour.White {
+		g.PlayerTurn = gamecolour.Black
+	} else {
+		g.PlayerTurn = gamecolour.White
+	}
 }
 
 func insideBoard(coor coordinate.Coordinate) bool {
