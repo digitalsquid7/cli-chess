@@ -1,10 +1,13 @@
 package main
 
 import (
-	"github.com/digitalsquid7/cli-chess/internal/chess"
+	"fmt"
+	"github.com/digitalsquid7/cli-chess/internal/app"
 )
 
 func main() {
-	game := chess.NewGame()
-	game.Play()
+	application := app.New()
+	if err := application.Run(); err != nil {
+		fmt.Print(err.Error())
+	}
 }

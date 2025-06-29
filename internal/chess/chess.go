@@ -2,36 +2,35 @@ package chess
 
 import (
 	"fmt"
-	"github.com/digitalsquid7/cli-chess/internal/ansi"
 	"github.com/digitalsquid7/cli-chess/internal/command"
 	"github.com/digitalsquid7/cli-chess/internal/gamestate"
 	"github.com/digitalsquid7/cli-chess/internal/screenupdater"
-	term "github.com/nsf/termbox-go"
 	"time"
 )
 
-type Game struct{}
+type Game struct {
+	commandExecutor *command.Executor
+	gameState       *gamestate.GameState
+	screenUpdater   *screenupdater.ScreenUpdater
+}
 
 func NewGame() *Game {
-	return &Game{}
+	gameState := gamestate.New()
+
+	return &Game{
+		commandExecutor: command.NewExecutor(gameState),
+		gameState:       gameState,
+		screenUpdater:   screenupdater.New(gameState),
+	}
 }
 
 func (g *Game) Play() error {
-	fmt.Print(ansi.EnableAlternativeScreen)
-	defer fmt.Print(ansi.DisableAlternativeScreen)
-
-	err := term.Init()
-	if err != nil {
-		return fmt.Errorf("term.Init: %w", err)
+	if err := g.screenUpdater.Update(); err != nil {
+		return fmt.Errorf("screenUpdater.Update: %w", err)
 	}
-	defer term.Close()
-
-	gameState := gamestate.New()
-	screenUpdater := screenupdater.New(gameState)
-	commandExecutor := command.NewExecutor(gameState)
 
 	for range time.Tick(time.Second / 15) {
-		end, err := commandExecutor.Execute()
+		end, err := g.commandExecutor.Execute()
 		if end {
 			return nil
 		}
@@ -40,7 +39,7 @@ func (g *Game) Play() error {
 			return fmt.Errorf("commandExecutor.Execute: %w", err)
 		}
 
-		if err = screenUpdater.Update(); err != nil {
+		if err = g.screenUpdater.Update(); err != nil {
 			return fmt.Errorf("screenUpdater.Update: %w", err)
 		}
 	}

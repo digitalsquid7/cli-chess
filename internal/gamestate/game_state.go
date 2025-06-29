@@ -21,7 +21,7 @@ type GameState struct {
 func New() *GameState {
 	gameState := &GameState{
 		Board:      board.New(),
-		Cursor:     coordinate.Coordinate{0, 2},
+		Cursor:     coordinate.Coordinate{6, 0},
 		PlayerTurn: gamecolour.White,
 	}
 
